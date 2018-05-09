@@ -55,6 +55,9 @@ lycee::MainApplication::MainApplication(HINSTANCE _hInst) :
 //
 LRESULT lycee::MainApplication::Callback(UINT uMsg, WPARAM wp, LPARAM lp) {
 	switch(uMsg) {
+	// ========================================================================
+	// マウス関連のイベント
+	//
 	case WM_MOUSEMOVE:
 		this->eventHandler->move(lycee::MouseInfo(MouseKey::MK_None, lp));
 		return 0;
@@ -78,15 +81,30 @@ LRESULT lycee::MainApplication::Callback(UINT uMsg, WPARAM wp, LPARAM lp) {
 	case WM_RBUTTONUP:
 		this->eventHandler->up(lycee::MouseInfo(MouseKey::MK_Right, lp));
 		return 0;
-
+	
+	// ========================================================================
+	// メニューイベント
+	//
 	case WM_COMMAND:
 		event_command(LOWORD(wp));
 		return 0;
-		
+	// ========================================================================
+	// キーボード関連のイベント
+	//
+	case WM_KEYDOWN:
+		eventHandler->keydown((UINT)wp);
+		return 0;
+
+	// ========================================================================
+	// 再描画イベント
+	//
 	case WM_PAINT:
 		event_paint();
 		return 0;
 
+	// ========================================================================
+	// ウィンドウ破棄イベント
+	//
 	case WM_DESTROY:
 		lycee::WindowProcedure::release(this);
 		PostQuitMessage(0);
@@ -185,7 +203,6 @@ int lycee::MainApplication::run(int nCmdShow) {
 // クラスの登録
 ATOM lycee::MainApplication::registerClass() {
 	WNDCLASSEX wcex = { 0 };
-
 
 	wcex.cbSize = sizeof(wcex);
 	wcex.cbClsExtra = 0;

@@ -33,13 +33,18 @@ void lycee::EventHandler::leave() {
 
 void lycee::EventHandler::paint(lycee::gui::GuiObjectPainter *painter) {
 	// デフォルトは全表示
-	for (unsigned int i = 0; i < app->roadInfoList.size(); i++) {
+	for (unsigned int i = 0; i < app->roadInfoList.size(); ++i) {
 		auto info = &app->roadInfoList[i];
 		info->paint(painter, app->nodeList, /*bPaintAnchor=*/true, /*bDrawWeight=*/true);
 		//app->paint_road(painter, info, /*bPaintAnchor=*/true, /*bDrawWeight=*/true);
 	}
 	app->paint_node(painter, /*bHitColor=*/false);
 }
+
+void lycee::EventHandler::keydown(UINT uKey) {
+	;
+}
+
 
 // =========================================================================
 // lycee::NodeEventHandler
@@ -95,7 +100,7 @@ void lycee::NodeEventHandler::leave() {
 
 void lycee::NodeEventHandler::paint(lycee::gui::GuiObjectPainter *painter) {
 	// ノード操作中はアンカーは非表示
-	for (unsigned int i = 0; i < app->roadInfoList.size(); i++) {
+	for (unsigned int i = 0; i < app->roadInfoList.size(); ++i) {
 		auto info = &app->roadInfoList[i];
 		info->paint(painter, app->nodeList, /*bPaintAnchor=*/false, /*bDrawWeight=*/true);
 		//app->paint_road(painter, info, /*bPaintAnchor=*/false, /*bDrawWeight=*/true);
@@ -107,7 +112,7 @@ void lycee::NodeEventHandler::paint(lycee::gui::GuiObjectPainter *painter) {
 
 int lycee::NodeEventHandler::hittestNode(long x, long y) {
 	POINT pt = { x, y };
-	for (unsigned int i = 0; i < app->nodeList.size(); i++) {
+	for (unsigned int i = 0; i < app->nodeList.size(); ++i) {
 		if (lycee::utils::Graphics::distPtAndPt(pt, app->nodeList[i])
 			< lycee::consts::ACO_Consts::HITTEST_SIZE) {
 			return i;
@@ -191,7 +196,7 @@ void lycee::AnchorEventHandler::leave() {
 
 void lycee::AnchorEventHandler::paint(lycee::gui::GuiObjectPainter *painter) {
 	// アンカー操作中はアクティベートされたセグメントのみアンカー表示
-	for (unsigned int i = 0; i < app->roadInfoList.size(); i++) {
+	for (unsigned int i = 0; i < app->roadInfoList.size(); ++i) {
 		auto info = &app->roadInfoList[i];
 		info->paint(painter, app->nodeList, /*bPaintAnchor=*/app->activeRoad == info, /*bDrawWeight=*/true);
 		//app->paint_road(painter, info, /*bPaintAnchor=*/app->activeRoad==info, /*bDrawWeight=*/true);
@@ -202,7 +207,7 @@ void lycee::AnchorEventHandler::paint(lycee::gui::GuiObjectPainter *painter) {
 
 
 int lycee::AnchorEventHandler::hittestSegment(const POINT &pt) {
-	for (unsigned int i = 0; i < app->roadInfoList.size(); i++) {
+	for (unsigned int i = 0; i < app->roadInfoList.size(); ++i) {
 		int n = app->roadInfoList[i].hitTestSegment(app->nodeList, pt, lycee::consts::ACO_Consts::HITTEST_SIZE);
 		if(n!=-1) return i;
 	}
@@ -216,36 +221,48 @@ int lycee::AnchorEventHandler::hittestSegment(const POINT &pt) {
 // =========================================================================
 void lycee::ACOEventHandler::reset() {
 	// 各種変数の初期化
-	if (pheromone) {
-		delete[] pheromone[0];
-		delete[] pheromone[1];
-	}
+	if (pheromone[0]) delete[] pheromone[0];
+	if (pheromone[1]) delete[] pheromone[1];
+
 	size = app->roadInfoList.size();
 	int *left = new int[size];
 	int *right = new int[size];
 	pheromone[0] = new double[size];
 	pheromone[1] = new double[size];
 
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; ++i) {
 		// 左側の経路の長さ
 		long leftLength = app->roadInfoList[i].calcBezierLength(app->nodeList, ACORoadInfo::LEFT);
 		
 		// 右側の経路の長さ
 		long rightLength = app->roadInfoList[i].calcBezierLength(app->nodeList, ACORoadInfo::RIGHT);
 
-		// 按分計算
-		left[i] = 100 * leftLength / (leftLength + rightLength);
-		right[i] = 100 - left[i];
+		// 重みの設定
+		if (leftLength == rightLength) {
+			left[i] = 3;
+			right[i] = 3;
+		}
+		else if (leftLength > rightLength) {
+			left[i] = 5;
+			right[i] = 1;
+		}
+		else {
+			/* leftLength < rightLength */
+			left[i] = 1;
+			right[i] = 5;
+		}
+		//left[i] = 100 * leftLength / (leftLength + rightLength);
+		//right[i] = 100 - left[i];
 	}
 
 	// ACOの生成
-	lycee::aco::AntColonyOptimization aco(/*Q=*/3, /*rho=*/0.8, /*epsilon=*/0.15);
+	lycee::aco::AntColonyOptimization aco(/*Q=*/3, /*rho=*/0.4, /*epsilon=*/0.15);
 	
 	// 経路上の重みの設定
 	aco.setCost(left, right, size);
 
 	// ACOの実行
-	aco.optimize(/*ant=*/1000);
+	aco.optimize(/*ant=*/500);
 
 	// 結果の取得
 	aco.getPheromone(pheromone, size);
@@ -258,7 +275,7 @@ void lycee::ACOEventHandler::reset() {
 void lycee::ACOEventHandler::paint(gui::GuiObjectPainter *painter) {
 	// ACO実行中は全表示
 	double weight[2];
-	for (unsigned int i = 0; i < app->roadInfoList.size(); i++) {
+	for (unsigned int i = 0; i < app->roadInfoList.size(); ++i) {
 		auto info = &app->roadInfoList[i];
 		weight[0] = pheromone[0][i];
 		weight[1] = pheromone[1][i];
@@ -266,4 +283,13 @@ void lycee::ACOEventHandler::paint(gui::GuiObjectPainter *painter) {
 		//app->paint_road(painter, info, /*bPaintAnchor=*/true, /*bDrawWeight=*/true, weight);
 	}
 	app->paint_node(painter, /*bHitColor=*/false);
+}
+
+void lycee::ACOEventHandler::keydown(UINT uKey) {
+	switch (uKey) {
+	case VK_SPACE:
+		this->reset();
+		app->refresh();
+		break;
+	}
 }

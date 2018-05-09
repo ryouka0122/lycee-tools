@@ -40,7 +40,7 @@ bool lycee::ACORoadInfo::hitTestSegment(const std::deque<POINT> &nodeList, const
 }
 
 int lycee::ACORoadInfo::hitTestAnchor(const POINT &pt, int size) {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; ++i) {
 		double dist = lycee::utils::Graphics::distPtAndPt(pt, this->get(i));
 		if (dist <= size) {
 			return i;
@@ -82,7 +82,7 @@ void lycee::ACORoadInfo::paint(
 
 	// アンカーの描画（オレンジ）
 	if (bPaintAnchor) {
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 2; ++i) {
 			painter->drawLine(pts[i], this->left[i], lycee::consts::ORANGE);
 			painter->plotPoint(this->left[i], lycee::consts::ANCHOR_POINT_SIZE, lycee::consts::ORANGE);
 

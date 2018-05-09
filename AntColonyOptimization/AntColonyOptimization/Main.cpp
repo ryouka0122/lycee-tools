@@ -5,55 +5,6 @@
 #include "utils.h"
 #include "aco.h"
 
-LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wp, LPARAM lp) {
-	switch (uMsg) {
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hWnd, uMsg, wp, lp);
-}
-
-int  test(HINSTANCE hInstance ,int nCmdShow) {
-
-	WNDCLASSEX wcex = { 0 };
-
-	wcex.cbSize = sizeof(wcex);
-	wcex.hbrBackground = GetStockBrush(WHITE_BRUSH);
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	wcex.lpfnWndProc = wndProc;
-	wcex.hInstance = hInstance;
-	wcex.lpszClassName = TEXT("TEST_APPLICATION_1.0.0");
-	wcex.lpszMenuName = NULL;
-	wcex.style = CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
-
-	ATOM atom = RegisterClassEx(&wcex);
-	if (INVALID_ATOM == atom) {
-		return -1;
-	}
-
-	HWND hWnd = CreateWindowEx(0L, MAKEINTATOM(atom),
-		TEXT("テスト アプリケーション"), WS_OVERLAPPEDWINDOW,
-		0, 0, 400, 400, NULL, NULL, hInstance, NULL);
-
-	if (IsWindow(hWnd)) {
-		ShowWindow(hWnd, nCmdShow);
-		UpdateWindow(hWnd);
-
-		MSG msg;
-		while (0 < GetMessage(&msg, NULL, 0, 0)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-	}
-	UnregisterClass(MAKEINTATOM(atom), hInstance);
-
-	return 0;
-}
-
 
 #ifdef UNICODE
 int WINAPI wWinMain(
@@ -92,8 +43,8 @@ int WINAPI WinMain(
 	
 	aco.getPheromone(result, 10);
 
-	for (int i = 0; i< 2; i++) {
-		for (int j = 0; j < step; j++) {
+	for (int i = 0; i< 2; ++i) {
+		for (int j = 0; j < step; ++j) {
 			lycee::Log::debug("%4.2lf ", result[i][j]);
 		}
 		lycee::Log::debug("\n");

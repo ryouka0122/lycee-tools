@@ -11,10 +11,10 @@ long lycee::utils::Graphics::calcBezierArcLength(const POINT pts[4], int div) {
 
 	long Ax = 0, Ay = 0, Bx = 0, By = 0, Cx = 0, Cy = 0;
 	long ConstA[] = { -1,  3, -3, 1 };
-	long ConstB[] = { 3, -6,  3, 0 };
+	long ConstB[] = {  3, -6,  3, 0 };
 	long ConstC[] = { -3,  3,  0, 0 };
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; ++i) {
 		Ax += ConstA[i] * pts[i].x;
 		Ay += ConstA[i] * pts[i].y;
 		Bx += ConstB[i] * pts[i].x;
@@ -40,13 +40,15 @@ long lycee::utils::Graphics::calcBezierArcLength(const POINT pts[4], int div) {
 		, Cy * Cy
 	};
 
-	double dx, dy, length = 0.0;
-	for (int t = 0; t < div; t++) {
+	double x, dx, dy, length = 0.0;
+	for (int t = 0; t < div; ++t) {
 		dx = 0.0;
 		dy = 0.0;
-		for (int i = 0; i < 5; i++) {
-			dx += pow((double)t / div, 4 - i) * Px[i];
-			dy += pow((double)t / div, 4 - i) * Py[i];
+		x = (double)t / div;
+		// Horner's Method
+		for (int i = 0; i < 5; ++i) {
+			dx = dx * x + Px[i];
+			dy = dy * x + Py[i];
 		}
 		length += sqrt(dx + dy) / div;
 	}

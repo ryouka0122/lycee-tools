@@ -10,7 +10,7 @@ lycee::aco::AntColonyOptimization::~AntColonyOptimization()
 	release();
 }
 
-lycee::aco::AntColonyOptimization::AntColonyOptimization(int Q, double rho, double epsilon, int iterLimit)
+lycee::aco::AntColonyOptimization::AntColonyOptimization(double Q, double rho, double epsilon, int iterLimit)
 	:
 	K_Q(Q)
 	, K_RHO(rho)
@@ -31,13 +31,13 @@ void lycee::aco::AntColonyOptimization::release() {
 
 }
 
-void lycee::aco::AntColonyOptimization::setOptimizer(int Q, double rho, double epsilon, int iterLimit) {
+void lycee::aco::AntColonyOptimization::setOptimizer(double Q, double rho, double epsilon, int iterLimit) {
 	this->K_Q = Q;
 	this->K_RHO = rho;
 	this->K_EPSILON = epsilon;
 	this->K_ITER_LIMIT = iterLimit;
 }
-void lycee::aco::AntColonyOptimization::setQ(int Q) {
+void lycee::aco::AntColonyOptimization::setQ(double Q) {
 	this->K_Q = Q;
 }
 void lycee::aco::AntColonyOptimization::setRho(double rho) {
@@ -58,7 +58,7 @@ void lycee::aco::AntColonyOptimization::setCost(int *left, int *right, int _step
 	cost = new int*[2];
 	cost[0] = new int[step];
 	cost[1] = new int[step];
-	for (int i = 0; i < step; i++) {
+	for (int i = 0; i < step; ++i) {
 		cost[0][i] = left[i];
 		cost[1][i] = right[i];
 	}
@@ -73,7 +73,7 @@ void lycee::aco::AntColonyOptimization::optimize(int ant) {
 
 	numsAnt = ant;
 	mstep = new int*[ant];
-	for (int i = 0; i < ant; i++) {
+	for (int i = 0; i < ant; ++i) {
 		mstep[i] = new int[step];
 		memset(mstep[i], 0, sizeof(int)*step);
 	}
@@ -93,8 +93,8 @@ void lycee::aco::AntColonyOptimization::optimize(int ant) {
 }
 
 void lycee::aco::AntColonyOptimization::walk() {
-	for (int ant = 0; ant < numsAnt; ant++) {
-		for (int s = 0; s < step; s++) {
+	for (int ant = 0; ant < numsAnt; ++ant) {
+		for (int s = 0; s < step; ++s) {
 			// epsilon - greedy  method
 			if ((rand1() < K_EPSILON)
 				|| (abs(pheromone[0][s] - pheromone[1][s]) < 1.0e-9)
@@ -116,22 +116,22 @@ void lycee::aco::AntColonyOptimization::walk() {
 
 void lycee::aco::AntColonyOptimization::update() {
 	// フェロモンの蒸発
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < step; j++) {
+	for (int i = 0; i < 2; ++i) {
+		for (int j = 0; j < step; ++j) {
 			pheromone[i][j] *= K_RHO;
 		}
 	}
 	int distTotal = 0;
 	int distWalk;
-	for (int ant = 0; ant < numsAnt; ant++) {
+	for (int ant = 0; ant < numsAnt; ++ant) {
 		// 移動距離の算出
 		distWalk = 0;
-		for (int i = 0; i < step; i++) {
+		for (int i = 0; i < step; ++i) {
 			distWalk += cost[mstep[ant][i]][i];
 		}
 		// フェロモンの上塗り
-		for (int i = 0; i < step; i++) {
-			pheromone[mstep[ant][i]][i] += K_Q * (1.0/distWalk);
+		for (int i = 0; i < step; ++i) {
+			pheromone[mstep[ant][i]][i] += K_Q / distWalk;
 		}
 		distTotal += distWalk;
 	}
@@ -139,7 +139,7 @@ void lycee::aco::AntColonyOptimization::update() {
 }
 
 void lycee::aco::AntColonyOptimization::getPheromone(double **result, int step) {
-	for (int i = 0; i < step; i++) {
+	for (int i = 0; i < step; ++i) {
 		result[0][i] = pheromone[0][i];
 		result[1][i] = pheromone[1][i];
 	}

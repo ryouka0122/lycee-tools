@@ -101,7 +101,7 @@ void lycee::gui::GuiObjectPainter::writeWeight(
 POINT lycee::gui::GuiObjectPainter::getCentroidCoord(const POINT *ppt, int cpt) {
 	long Gx = 0;
 	long Gy = 0;
-	for(int i=0 ; i<cpt ; i++) {
+	for(int i=0 ; i<cpt ; ++i) {
 		Gx += ppt[i].x;
 		Gy += ppt[i].y;
 	}

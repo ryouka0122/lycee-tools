@@ -60,8 +60,17 @@ namespace lycee {
 			const std::deque<POINT> &nodeList,
 			bool bPaintAnchor,
 			bool bDrawWeight,
-			double *weight = (double*)0
+			double *weight
 		);
+
+		void paint(
+			lycee::gui::GuiObjectPainter *painter,
+			const std::deque<POINT> &nodeList,
+			bool bPaintAnchor,
+			bool bDrawWeight
+		) {
+			paint(painter, nodeList, bPaintAnchor, bDrawWeight, 0);
+		}
 
 	};
 
@@ -106,12 +115,15 @@ namespace lycee {
 		explicit EventHandler(MainApplication *_app) : app(_app) { }
 
 		virtual void reset();
+		
 		virtual void down(const MouseInfo &info);
 		virtual void up(const MouseInfo &info);
 		virtual void move(const MouseInfo &info);
 		virtual void leave();
 
 		virtual void paint(gui::GuiObjectPainter *painter);
+
+		virtual void keydown(UINT wKey);
 	};
 
 	// ノード操作用ハンドラ
@@ -169,6 +181,7 @@ namespace lycee {
 		*/
 		virtual void paint(gui::GuiObjectPainter *painter);
 
+		virtual void keydown(UINT uKey);
 	private:
 		int size;
 		double* pheromone[2];
@@ -285,13 +298,6 @@ namespace lycee {
 		void paint_node(gui::GuiObjectPainter *painter,
 			bool bHitColor);
 
-		// セグメントの描画
-		void paint_road(gui::GuiObjectPainter *painter,
-			const ACORoadInfo *road,
-			bool bPaintAnchor,
-			bool bDrawWeight,
-			double *weight=0
-			);
 
 		// ============================
 		// メニューイベント

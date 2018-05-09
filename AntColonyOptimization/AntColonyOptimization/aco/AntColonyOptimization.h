@@ -15,20 +15,20 @@ namespace aco {
 		// ==================================================
 		// コンストラクタ
 		//
-		explicit AntColonyOptimization(int Q, double rho, double epsilon, int iterLimit = 50);
+		explicit AntColonyOptimization(double Q, double rho, double epsilon, int iterLimit = 50);
 
 		// ==================================================
 		// 最適化で使用する定数の設定
 		//
-		void setOptimizer(int Q, double rho, double epsilon, int iterLimit);
+		void setOptimizer(double Q, double rho, double epsilon, int iterLimit);
 
-		void setQ(int Q);
+		void setQ(double Q);
 		void setRho(double rho);
 		void setEpsilon(double epsilon);
 		void setIterLimit(int iterLimit);
 
 	private:
-		int K_Q;
+		double K_Q;
 		double K_RHO;
 		double K_EPSILON;
 		int K_ITER_LIMIT;
@@ -58,7 +58,7 @@ namespace aco {
 		template<typename T>
 		T** release_array(T **ary, int n) {
 			if (ary) {
-				for(int i=0 ; i<n ; i++) {
+				for(int i=0 ; i<n ; ++i) {
 					delete[] ary[i];
 				}
 				delete[] ary;
@@ -69,7 +69,7 @@ namespace aco {
 		template<typename T>
 		T** new_2array(int n, int m) {
 			T** res = new T*[n];
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < n; ++i) {
 				res[i] = (T*)memset(new T[m], 0, sizeof(T)*m);
 			}
 			return res;
